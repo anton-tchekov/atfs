@@ -13,14 +13,31 @@
 
 static u8 _data[RAMFS_BLOCK_SIZE * RAMFS_BLOCK_COUNT];
 
+static DeviceStatus _check_range(u32 offset, u32 count)
+{
+	return (offset >= RAMFS_BLOCK_COUNT) ||
+		(count >= RAMFS_BLOCK_COUNT) ||
+		(offset + count >= RAMFS_BLOCK_COUNT);
+}
+
 static DeviceStatus _ramdisk_read(u32 offset, u32 count, u8 *buffer)
 {
+	if(_check_range(offset, count))
+	{
+		return DEVICE_STATUS_OUT_OF_BOUNDS;
+	}
+
 	memcpy(buffer, _data + offset * RAMFS_BLOCK_SIZE, count * RAMFS_BLOCK_SIZE);
 	return DEVICE_STATUS_OK;
 }
 
 static DeviceStatus _ramdisk_write(u32 offset, u32 count, u8 *buffer)
 {
+	if(_check_range(offset, count))
+	{
+		return DEVICE_STATUS_OUT_OF_BOUNDS;
+	}
+
 	memcpy(_data + offset * RAMFS_BLOCK_SIZE, buffer, count * RAMFS_BLOCK_SIZE);
 	return DEVICE_STATUS_OK;
 }

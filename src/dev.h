@@ -15,6 +15,7 @@ typedef enum
 {
 	DEVICE_STATUS_OK,
 	DEVICE_STATUS_FAILURE,
+	DEVICE_STATUS_OUT_OF_BOUNDS,
 } DeviceStatus;
 
 /** Block device interface struct */
@@ -32,5 +33,9 @@ typedef struct
 	/** Multi-block write operation */
 	DeviceStatus (*Write)(u32 offset, u32 count, u8 *buffer);
 } BlockDevice;
+
+
+const char *dev_status_string(DeviceStatus status);
+void dev_print_block(BlockDevice *dev, u32 block);
 
 #endif /* __DEV_H__ */

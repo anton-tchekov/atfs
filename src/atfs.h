@@ -20,9 +20,6 @@
 
 #include <types.h>
 
-/** Disk sector size (512 bytes) */
-#define ATFS_BLOCK_SIZE           512
-
 /** Boot sector offset in blocks */
 #define ATFS_SECTOR_BOOT            0
 
