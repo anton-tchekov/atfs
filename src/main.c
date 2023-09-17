@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include "ramdisk.h"
+#include "atfs_dir.h"
 #include <string.h>
 #include <stdlib.h>
+
+#define ROOT_FILE_ADDR 0x00000001
+#define ROOT_FILE_CHUNK_SIZE 4
 
 int main(int argc, char **argv)
 {
@@ -13,7 +17,34 @@ int main(int argc, char **argv)
 
 	dev->Write(0, 1, buffer);
 
-	dev_print_block(dev, 0);
+    DirEntry rootDir = {
+            1, 1, 4, 2048, "/"
+    };
+
+    DirEntry tmpDir = {
+            1, 6, 1, 512, "tmp"
+    };
+    DirEntry homeDir = {
+            1, 8, 1, 512, "home"
+    };
+    DirEntry timDir = {
+            1, 10, 1, 512, "tim"
+    };
+    DirEntry antonDir = {
+            2, 12, 1, 512, "anton"
+    };
+
+    create_directory_entry(dev, ROOT_FILE_ADDR, ROOT_FILE_CHUNK_SIZE, homeDir);
+    create_directory_entry(dev, ROOT_FILE_ADDR, ROOT_FILE_CHUNK_SIZE, tmpDir);
+    create_directory_entry(dev, 8, 1, timDir);
+    create_directory_entry(dev, 10, 1, antonDir);
+
+    dev_print_block(dev, ROOT_FILE_ADDR);
+    dev_print_block(dev, 8);
+
+    DirEntry test = get_adress_by_path(dev, "/home/tim/anton", rootDir);
+
+    printf("Adress: %d Name: %s Size (c): %d\n", test.addr, test.name, test.cSize);
 
 	return 0;
 }
