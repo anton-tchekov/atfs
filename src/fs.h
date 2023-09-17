@@ -6,6 +6,17 @@
  * @version 0.1
  * @date    23.04.2023
  * @brief   File system access
+
+
+  *
+ * - All integers are stored as little endian
+ * - All files are contiguous
+ * - Filename separator is a dot '.' not slash '/'
+ * - Filenames may only contain lowercase letters ('a' to 'z'),
+ *   numbers ('0' to '9') and underscore ('_') and may not start with
+ *   a number. File extensions are not supported.
+ *
+ * - Example path: "root.images.vacation.me_on_the_beach"
  */
 
 #ifndef __FS_H__
@@ -14,6 +25,28 @@
 #include <status.h>
 #include <types.h>
 #include <atfs.h>
+
+
+/* --- Directory entries --- */
+
+/** Size of a directory entry in bytes */
+#define ATFS_DIR_ENTRY_SIZE        64
+
+/** Maximum length of a file name */
+#define ATFS_MAX_FILE_NAME_LENGTH  54
+
+/** Byte offset of the starting block */
+#define ATFS_DIR_ENTRY_OFFSET_START 0
+
+/** Byte offset of the size in blocks */
+#define ATFS_DIR_ENTRY_OFFSET_SIZE  4
+
+/** Byte offset of the entry name */
+#define ATFS_DIR_ENTRY_OFFSET_NAME  8
+
+/** Byte offset of the entry type */
+#define ATFS_DIR_ENTRY_OFFSET_TYPE 63
+
 
 /** File Handle */
 typedef struct
