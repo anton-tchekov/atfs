@@ -1,3 +1,5 @@
+#if 0
+
 #include "atfs_path.h"
 
 char *path_join(char *path, const char *append)
@@ -69,3 +71,5 @@ bool path_valid(const char *path)
 	/* Path may not end with separator, but allow empty path */
 	return !was_sep || *path == '\0';
 }
+
+#endif

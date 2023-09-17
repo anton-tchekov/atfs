@@ -1,3 +1,5 @@
+#if 0
+
 #include "atfs_format.h"
 
 #define ATFS_INITIAL_ROOT_SIZE 1
@@ -49,3 +51,4 @@ Status atfs_format(BlockDevice *dev)
 	return STATUS_OK;
 }
 
+#endif

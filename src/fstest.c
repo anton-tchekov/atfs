@@ -1,3 +1,5 @@
+#if 0
+
 #include "fs.h"
 #include <atfs.h>
 #include <types.h>
@@ -210,3 +212,5 @@ int main(void)
 
 	return 0;
 }
+
+#endif

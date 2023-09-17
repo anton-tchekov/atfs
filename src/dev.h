@@ -10,7 +10,12 @@
 #define __DEV_H__
 
 #include "types.h"
-#include "status.h"
+
+typedef enum
+{
+	DEVICE_STATUS_OK,
+	DEVICE_STATUS_FAILURE,
+} DeviceStatus;
 
 /** Block device interface struct */
 typedef struct
@@ -22,10 +27,10 @@ typedef struct
 	u32 BlockCount;
 
 	/** Multi-block read operation */
-	Status (*Read)(u32 offset, u32 count, u8 *buffer);
+	DeviceStatus (*Read)(u32 offset, u32 count, u8 *buffer);
 
 	/** Multi-block write operation */
-	Status (*Write)(u32 offset, u32 count, u8 *buffer);
+	DeviceStatus (*Write)(u32 offset, u32 count, u8 *buffer);
 } BlockDevice;
 
 #endif /* __DEV_H__ */

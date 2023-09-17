@@ -1,3 +1,4 @@
+#if 0
 /**
  * @file    fs.c
  * @author  Tim Gabrikowski, Anton Tchekov
@@ -290,3 +291,4 @@ Status fs_dread(Dir *dir, u32 index, DirEntry *entry)
 	dir_entry_get(buf + offset, entry);
 	return STATUS_OK;
 }
+#endif

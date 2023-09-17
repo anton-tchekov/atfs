@@ -1,3 +1,5 @@
+#if 0
+
 /**
  * @file    fs.h
  * @author  Tim Gabrikowski, Anton Tchekov
@@ -159,3 +161,5 @@ Status fs_dopen(const char *path, Dir *dir);
 Status fs_dread(Dir *dir, u32 index, DirEntry *entry);
 
 #endif /* __FS_H__ */
+
+#endif

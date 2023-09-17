@@ -6,22 +6,23 @@
  */
 
 #include "ramdisk.h"
+#include <string.h>
 
 #define RAMFS_BLOCK_SIZE   512
 #define RAMFS_BLOCK_COUNT  512
 
 static u8 _data[RAMFS_BLOCK_SIZE * RAMFS_BLOCK_COUNT];
 
-static Status _ramdisk_read(u32 offset, u32 count, u8 *buffer)
+static DeviceStatus _ramdisk_read(u32 offset, u32 count, u8 *buffer)
 {
-	memcpy(buf, _data + offset * RAMFS_BLOCK_SIZE, count * RAMFS_BLOCK_SIZE);
-	return STATUS_OK;
+	memcpy(buffer, _data + offset * RAMFS_BLOCK_SIZE, count * RAMFS_BLOCK_SIZE);
+	return DEVICE_STATUS_OK;
 }
 
-static Status _ramdisk_write(u32 offset, u32 count, u8 *buffer)
+static DeviceStatus _ramdisk_write(u32 offset, u32 count, u8 *buffer)
 {
-	memcpy(_data + offset * RAMFS_BLOCK_SIZE, buf, count * RAMFS_BLOCK_SIZE);
-	return STATUS_OK;
+	memcpy(_data + offset * RAMFS_BLOCK_SIZE, buffer, count * RAMFS_BLOCK_SIZE);
+	return DEVICE_STATUS_OK;
 }
 
 BlockDevice ramdisk =
