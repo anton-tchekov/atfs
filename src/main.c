@@ -3,6 +3,7 @@
 #include "atfs_dir.h"
 #include <string.h>
 #include <stdlib.h>
+#include "atfs.h"
 
 #define ROOT_FILE_ADDR 0x00000001
 #define ROOT_FILE_CHUNK_SIZE 4
@@ -45,6 +46,9 @@ int main(int argc, char **argv)
     DirEntry test = get_adress_by_path(dev, "/home/tim/anton", rootDir);
 
     printf("Adress: %d Name: %s Size (c): %d\n", test.addr, test.name, test.cSize);
+
+	printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
+	printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
 
 	return 0;
 }
