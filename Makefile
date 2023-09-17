@@ -5,7 +5,7 @@
 # compiles all C files located in the source directory and all subdirectories.
 
 # Executable Name
-PROJECT := default
+PROJECT := atfs-test
 
 # Compiler
 CC := gcc
