@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "atfs.h"
 #include "atfs_format.h"
+#include "atfs_alloc.h"
 
 #define ROOT_FILE_ADDR 0x00000001
 #define ROOT_FILE_CHUNK_SIZE 4
@@ -13,11 +14,9 @@ int main(int argc, char **argv)
 {
 	BlockDevice *dev = &ramdisk;
 
-	/*u8 buffer[dev->BlockSize];
+#if 0
+	u8 buffer[dev->BlockSize];
 	memset(buffer, 0, sizeof(buffer));
-	strcpy((char *)buffer, "Hello World");
-	dev->Write(0, 1, buffer);*/
-
 	dev->Write(0, 1, buffer);
 
     DirEntry rootDir = {
@@ -48,6 +47,15 @@ int main(int argc, char **argv)
     DirEntry test = get_adress_by_path(dev, "/home/tim/anton", rootDir);
 
     printf("Adress: %d Name: %s Size (c): %d\n", test.addr, test.name, test.cSize);
+
+
+	printf("%s\n", atfs_status_string(atfs_format(dev)));
+
+
+	//printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
+	//printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
+#endif
+
 	printf("%s\n", atfs_status_string(atfs_format(dev)));
 	dev_print_block(dev, 0);
 	dev_print_block(dev, 1);
@@ -56,8 +64,32 @@ int main(int argc, char **argv)
 	dev_print_block(dev, 4);
 	dev_print_block(dev, 5);
 
-	//printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
-	//printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
+	atfs_print_free(dev);
+
+	u32 start;
+
+	u32 first = 0;
+	printf("%s\n", atfs_status_string(atfs_alloc(dev, 10, &first)));
+	printf("allocated area: %d\n", first);
+	atfs_print_free(dev);
+
+	u32 second = 0;
+	printf("%s\n", atfs_status_string(atfs_alloc(dev, 3, &second)));
+	printf("allocated area: %d\n", second);
+	atfs_print_free(dev);
+
+	start = 0;
+	printf("%s\n", atfs_status_string(atfs_free(dev, first, 10)));
+	atfs_print_free(dev);
+
+	start = 0;
+	printf("%s\n", atfs_status_string(atfs_alloc(dev, 1, &start)));
+	printf("allocated area: %d\n", start);
+
+	printf("%s\n", atfs_status_string(atfs_free(dev, second, 3)));
+
+
+	atfs_print_free(dev);
 
 	return 0;
 }
