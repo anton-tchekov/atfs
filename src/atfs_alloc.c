@@ -7,21 +7,34 @@
 #include <inttypes.h>
 #endif /* ATFS_DEBUG */
 
+DeviceStatus read_for_modify(BlockDevice *dev, u32 block, u8 *buf)
+{
+	DeviceStatus status = DEVICE_STATUS_OK;
+	if(block == ATFS_SECTOR_BOOT)
+	{
+		/* Read contents to not overwrite bootsector (yikes) */
+		status = dev->Read(block, 1, buf);
+	}
+	else
+	{
+		/* Can be safely zeroed */
+		memset(buf, 0, dev->BlockSize);
+	}
+
+	return status;
+}
+
 ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 {
 	u8 buf[dev->BlockSize];
 	DeviceStatus status;
 	u32 cur = ATFS_SECTOR_BOOT;
 	u32 prev = 0;
-	u32 next = 1;
-	u32 cur_size = 0;
+	u32 next;
+	u32 cur_size;
 	do
 	{
-		if((status = dev->Read(cur, 1, buf)))
-		{
-			return status;
-		}
-
+		if((status = dev->Read(cur, 1, buf))) { return status; }
 		next = atfs_read32(buf + ATFS_OFFSET_FREE_NEXT);
 		cur_size = atfs_read32(buf + ATFS_OFFSET_FREE_SIZE);
 		if(cur_size >= req_size)
@@ -42,16 +55,9 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 	else if(cur_size == req_size)
 	{
 		/* Make previous area point to next area */
-		if((status = dev->Read(prev, 1, buf)))
-		{
-			return status;
-		}
-
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next);
-		if((status = dev->Write(prev, 1, buf)))
-		{
-			return status;
-		}
+		if((status = dev->Write(prev, 1, buf))) { return status; }
 	}
 	else /* cur_size > req_size */
 	{
@@ -60,25 +66,15 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 		u32 new_size = cur_size - req_size;
 
 		/* Make previous area point to second part */
-		if((status = dev->Read(prev, 1, buf)))
-		{
-			return status;
-		}
-
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, new_start);
-		if((status = dev->Write(prev, 1, buf)))
-		{
-			return status;
-		}
+		if((status = dev->Write(prev, 1, buf))) { return status; }
 
 		/* Make second part point to next area */
 		memset(buf, 0, dev->BlockSize);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, new_size);
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next);
-		if((status = dev->Write(new_start, 1, buf)))
-		{
-			return status;
-		}
+		if((status = dev->Write(new_start, 1, buf))) { return status; }
 	}
 
 	*start = cur;
@@ -97,11 +93,7 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 
 	do
 	{
-		if((status = dev->Read(prev, 1, buf)))
-		{
-			return status;
-		}
-
+		if((status = dev->Read(prev, 1, buf))) { return status; }
 		next = atfs_read32(buf + ATFS_OFFSET_FREE_NEXT);
 		prev_size = atfs_read32(buf + ATFS_OFFSET_FREE_SIZE);
 		if(next > block)
@@ -125,14 +117,14 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 
 	if(merge_with_prev && merge_with_next)
 	{
-		if((status = dev->Read(prev, 1, buf))) { return status; }
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next_next);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, prev_size + count + next_size);
 		if((status = dev->Write(prev, 1, buf))) { return status; }
 	}
 	else if(merge_with_prev)
 	{
-		if((status = dev->Read(prev, 1, buf))) { return status; }
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, prev_size + count);
 		if((status = dev->Write(prev, 1, buf))) { return status; }
 	}
@@ -143,7 +135,7 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, count + next_size);
 		if((status = dev->Write(block, 1, buf))) { return status; }
 
-		if((status = dev->Read(prev, 1, buf))) { return status; }
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, block);
 		if((status = dev->Write(prev, 1, buf))) { return status; }
 	}
@@ -154,7 +146,7 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, count);
 		if((status = dev->Write(block, 1, buf))) { return status; }
 
-		if((status = dev->Read(prev, 1, buf))) { return status; }
+		if((status = read_for_modify(dev, prev, buf))) { return status; }
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, block);
 		if((status = dev->Write(prev, 1, buf))) { return status; }
 	}
