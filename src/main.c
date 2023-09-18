@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "atfs.h"
+#include "atfs_format.h"
 
 #define ROOT_FILE_ADDR 0x00000001
 #define ROOT_FILE_CHUNK_SIZE 4
@@ -12,9 +13,10 @@ int main(int argc, char **argv)
 {
 	BlockDevice *dev = &ramdisk;
 
-	u8 buffer[dev->BlockSize];
+	/*u8 buffer[dev->BlockSize];
 	memset(buffer, 0, sizeof(buffer));
 	strcpy((char *)buffer, "Hello World");
+	dev->Write(0, 1, buffer);*/
 
 	dev->Write(0, 1, buffer);
 
@@ -46,9 +48,16 @@ int main(int argc, char **argv)
     DirEntry test = get_adress_by_path(dev, "/home/tim/anton", rootDir);
 
     printf("Adress: %d Name: %s Size (c): %d\n", test.addr, test.name, test.cSize);
+	printf("%s\n", atfs_status_string(atfs_format(dev)));
+	dev_print_block(dev, 0);
+	dev_print_block(dev, 1);
+	dev_print_block(dev, 2);
+	dev_print_block(dev, 3);
+	dev_print_block(dev, 4);
+	dev_print_block(dev, 5);
 
-	printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
-	printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
+	//printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
+	//printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
 
 	return 0;
 }

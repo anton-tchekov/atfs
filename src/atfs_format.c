@@ -5,6 +5,8 @@
 static ATFS_Status _setup_boot_block(BlockDevice *dev)
 {
 	u8 buf[dev->BlockSize];
+	memset(buf, 0, dev->BlockSize);
+
 	memcpy(buf + ATFS_OFFSET_SIGNATURE, ATFS_SIGNATURE, sizeof(ATFS_SIGNATURE));
 	atfs_write32(buf + ATFS_OFFSET_REVISION, ATFS_REVISION);
 	atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, ATFS_INITIAL_ROOT_SIZE + 1);
@@ -28,7 +30,7 @@ static ATFS_Status _setup_free_list(BlockDevice *dev)
 
 	/* Free space is total size minus the initial size of the root directory
 		and minus 1 for the bootsector */
-	u32 free_size = dev->BlockCount - ATFS_INITIAL_ROOT_SIZE + 1;
+	u32 free_size = dev->BlockCount - ATFS_INITIAL_ROOT_SIZE - 1;
 
 	/* There is no next free area */
 	atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, 0);
@@ -58,5 +60,5 @@ ATFS_Status atfs_format(BlockDevice *dev)
 		return ret;
 	}
 
-	return ATFS_STATUS_SUCCESS;
+	return ATFS_STATUS_OK;
 }

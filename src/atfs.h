@@ -47,12 +47,14 @@ extern const u8 ATFS_SIGNATURE[4];
 /** Offset of root block size in ATFS bootsector */
 #define ATFS_OFFSET_ROOT_SIZE      20
 
-typedef enum
+enum
 {
-	ATFS_STATUS_SUCCESS,
+	ATFS_STATUS_OK,
 	ATFS_STATUS_NO_SUCH_FILE_OR_DIRECTORY = DEVICE_STATUS_COUNT,
-	ATFS_NO_SPACE_LEFT_ON_DEVICE,
-} ATFS_Status;
+	ATFS_STATUS_NO_SPACE_LEFT_ON_DEVICE,
+};
+
+typedef int ATFS_Status;
 
 const char *atfs_status_string(ATFS_Status status);
 

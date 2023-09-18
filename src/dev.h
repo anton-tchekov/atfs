@@ -11,13 +11,15 @@
 
 #include "types.h"
 
-typedef enum
+enum
 {
 	DEVICE_STATUS_OK,
 	DEVICE_STATUS_FAILURE,
 	DEVICE_STATUS_OUT_OF_BOUNDS,
 	DEVICE_STATUS_COUNT,
-} DeviceStatus;
+};
+
+typedef int DeviceStatus;
 
 /** Block device interface struct */
 typedef struct

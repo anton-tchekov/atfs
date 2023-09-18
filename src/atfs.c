@@ -11,12 +11,12 @@ const char *atfs_status_string(ATFS_Status status)
 		"No space left on device",
 	};
 
-	if((DeviceStatus)status < DEVICE_STATUS_COUNT)
+	if(status < DEVICE_STATUS_COUNT)
 	{
-		return dev_status_string((DeviceStatus)status);
+		return dev_status_string(status);
 	}
 
 	status -= DEVICE_STATUS_COUNT;
-	assert(status < ARRLEN(status_str));
+	assert(status >= 0 && status < (int)ARRLEN(status_str));
 	return status_str[status];
 }

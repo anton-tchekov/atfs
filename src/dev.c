@@ -47,6 +47,6 @@ const char *dev_status_string(DeviceStatus status)
 		"Out of bounds access",
 	};
 
-	assert(status >= 0 && status < ARRLEN(status_strs));
+	assert(status >= 0 && status < (int)ARRLEN(status_strs));
 	return status_strs[status];
 }
