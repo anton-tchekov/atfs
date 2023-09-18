@@ -1,3 +1,10 @@
+/**
+ * @file    atfs_alloc.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    29.05.2023
+ */
+
 #include "atfs_alloc.h"
 #include "atfs_util.h"
 #include <string.h>
@@ -7,7 +14,7 @@
 #include <inttypes.h>
 #endif /* ATFS_DEBUG */
 
-DeviceStatus read_for_modify(BlockDevice *dev, u32 block, u8 *buf)
+static DeviceStatus read_for_modify(BlockDevice *dev, u32 block, u8 *buf)
 {
 	DeviceStatus status = DEVICE_STATUS_OK;
 	if(block == ATFS_SECTOR_BOOT)
