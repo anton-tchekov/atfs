@@ -1,3 +1,10 @@
+/**
+ * @file    atfs_format.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    18.09.2023
+ */
+
 #include "atfs_format.h"
 #include "atfs_util.h"
 #include <string.h>
