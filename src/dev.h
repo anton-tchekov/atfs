@@ -37,7 +37,20 @@ typedef struct
 	DeviceStatus (*Write)(u32 offset, u32 count, u8 *buffer);
 } BlockDevice;
 
+/**
+ * @brief Returns a human-readable status string for a status code
+ *
+ * @param status The status code
+ * @return Pointer to string constant
+ */
 const char *dev_status_string(DeviceStatus status);
+
+/**
+ * @brief Prints the hexdump a single device block to stdio
+ *
+ * @param dev Block device
+ * @param block Block number
+ */
 void dev_print_block(BlockDevice *dev, u32 block);
 
 #endif /* __DEV_H__ */

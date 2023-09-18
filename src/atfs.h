@@ -4,6 +4,15 @@
  * @version 0.1
  * @date    29.05.2023
  * @brief   ATFS File System
+ *
+ * File System Properties:
+ * - All integers are stored as little endian
+ * - All files are contiguous
+ * - Filename separator is a dot '.' not slash '/'
+ * - Filenames may only contain lowercase letters ('a' to 'z'),
+ *   numbers ('0' to '9') and underscore ('_') and may not start with
+ *   a number. File extensions are not supported.
+ *   Example path: "home.anton.images.vacation.beach"
  */
 
 #ifndef __ATFS_H__
@@ -23,6 +32,23 @@
 
 /** Current FS Revision */
 #define ATFS_REVISION               1
+
+/* --- Directory entries --- */
+
+/** Maximum length of a file name */
+#define ATFS_MAX_FILE_NAME_LENGTH 255
+
+/** Byte offset of the entry type */
+#define ATFS_DIR_ENTRY_OFFSET_TYPE  0
+
+/** Byte offset of the starting block */
+#define ATFS_DIR_ENTRY_OFFSET_START 1
+
+/** Byte offset of the size in bytes */
+#define ATFS_DIR_ENTRY_OFFSET_SIZE  5
+
+/** Byte offset of the entry name */
+#define ATFS_DIR_ENTRY_OFFSET_NAME 13
 
 /* --- Boot sector --- */
 
@@ -58,45 +84,42 @@ enum
 
 typedef int ATFS_Status;
 
+typedef enum
+{
+	ATFS_TYPE_TERMINATOR,
+	ATFS_TYPE_DIR,
+	ATFS_TYPE_FILE,
+} ATFS_FileType;
+
+/** Directory Entry structure, this is NOT the on-disk representation */
+typedef struct
+{
+	/** Size of the file in bytes */
+	u64 Size;
+
+	/** Starting address of the file in blocks */
+	u32 Start;
+
+	/** File type */
+	u8 Type;
+
+	/** File name */
+	char Name[ATFS_MAX_FILE_NAME_LENGTH + 1];
+} ATFS_DirEntry;
+
+/**
+ * @brief Returns a human-readable status string for a status code
+ *
+ * @param status The status code
+ * @return Pointer to string constant
+ */
 const char *atfs_status_string(ATFS_Status status);
 
+
+
+
+
 #if 0
-
-
-/*
-  *
- * - All integers are stored as little endian
- * - All files are contiguous
- * - Filename separator is a dot '.' not slash '/'
- * - Filenames may only contain lowercase letters ('a' to 'z'),
- *   numbers ('0' to '9') and underscore ('_') and may not start with
- *   a number. File extensions are not supported.
- *
- * - Example path: "root.images.vacation.me_on_the_beach"
- */
-
-#include <status.h>
-#include <types.h>
-#include <atfs.h>
-
-
-/* --- Directory entries --- */
-
-/** Maximum length of a file name */
-#define ATFS_MAX_FILE_NAME_LENGTH  54
-
-/** Byte offset of the starting block */
-#define ATFS_DIR_ENTRY_OFFSET_START 0
-
-/** Byte offset of the size in blocks */
-#define ATFS_DIR_ENTRY_OFFSET_SIZE  4
-
-/** Byte offset of the entry name */
-#define ATFS_DIR_ENTRY_OFFSET_NAME  8
-
-/** Byte offset of the entry type */
-#define ATFS_DIR_ENTRY_OFFSET_TYPE 63
-
 
 /** File Handle */
 typedef struct
@@ -117,37 +140,6 @@ typedef struct
 	/** Every directory is a file */
 	File InternalFile;
 } Dir;
-
-/**
- * Directory entry: 64 bytes
- * - 4 byte address
- * - 4 byte size
- * - 54 byte file name
- * - 1 byte null terminator
- * - 1 byte type (directory = 0, text file = non-zero)
- */
-typedef struct
-{
-	/** Starting block of the file */
-	u32 StartBlock;
-
-	/** Size of the file in blocks */
-	u32 SizeBlocks;
-
-	/** Name of the file */
-	char Name[ATFS_MAX_FILE_NAME_LENGTH + 1];
-
-	/** Directory/File type */
-	u8 Type;
-} DirEntry;
-
-
-/**
- * @brief Format disk with ATFS
- *
- * @param disk Drive number
- */
-Status fs_format(u32 disk);
 
 /**
  * @brief Mount disk with ATFS
