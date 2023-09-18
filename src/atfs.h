@@ -112,6 +112,29 @@ typedef struct
 	char Name[ATFS_MAX_FILE_NAME_LENGTH + 1];
 } ATFS_DirEntry;
 
+/** File Handle */
+typedef struct
+{
+	/** Current position pointer */
+	u64 Position;
+
+	/** File size in bytes */
+	u64 SizeBytes;
+
+	/** Starting block of the file */
+	u32 StartBlock;
+
+	/** Capacity of the file in blocks */
+	u32 CapacityBlocks;
+} ATFS_File;
+
+/** Directory Handle */
+typedef struct
+{
+	/** Every directory is a file */
+	ATFS_File InternalFile;
+} ATFS_Dir;
+
 /**
  * @brief Returns a human-readable status string for a status code
  *
@@ -120,120 +143,17 @@ typedef struct
  */
 const char *atfs_status_string(ATFS_Status status);
 
+/* --- Files --- */
+ATFS_Status atfs_fopen(BlockDevice *dev, const char *path, ATFS_File *file);
+ATFS_Status atfs_fread(ATFS_File *file, void *buf, size_t bytes);
+ATFS_Status atfs_fwrite(ATFS_File *file, const void *buf, size_t bytes);
+ATFS_Status atfs_fcreate(BlockDevice *dev, const char *path,
+	u64 capacity_bytes);
+ATFS_Status atfs_rename(BlockDevice *dev, const char *dst, const char *src);
+ATFS_Status atfs_delete(BlockDevice *dev, const char *path);
 
-
-
-
-#if 0
-
-/** File Handle */
-typedef struct
-{
-	/** Starting block of the file */
-	u32 StartBlock;
-
-	/** Size of the file in blocks */
-	u32 SizeBlocks;
-} File;
-
-/** Directory Handle */
-typedef struct
-{
-	/** Number of entries in the directory */
-	u32 NumEntries;
-
-	/** Every directory is a file */
-	File InternalFile;
-} Dir;
-
-/**
- * @brief Create a file. If the file already exists, it is resized to
- *        the specified size. When a file is resized, all file handles to it
- *        are invalidated and need to be reopened.
- *
- * @param path Path to file
- * @param size Capacity of the file in blocks
- * @return Status
- */
-Status fs_fcreate(const char *path, u32 size);
-
-/**
- * @brief Open a file to get a file handle. It is not neccessary to close
- *        a file, therefore there is no `fs_fclose` function.
- *
- * @param path Path to file
- * @param file Output parameter file handle
- * @return Status
- */
-Status fs_fopen(const char *path, File *file);
-
-/**
- * @brief Reads one block from the file.
- *
- * @param file File handle
- * @param block The block to read
- * @param buf Buffer for read data (512 bytes)
- * @return Status
- */
-Status fs_fread(File *file, u32 block, void *buf);
-
-/**
- * @brief Write one block to the file
- *
- * @param file File handle
- * @param block The block to write
- * @param buf Buffer with data to write (512 bytes)
- * @return Status
- */
-Status fs_fwrite(File *file, u32 block, const void *buf);
-
-/**
- * @brief Recursively delete a files and directories
- *
- * @param path Path to file
- * @return Status
- */
-Status fs_delete(const char *path);
-
-/**
- * @brief Move or rename a file or a directory.
- *
- * @param dest Destination path
- * @param src Source path
- * @return Status
- */
-Status fs_rename(const char *dest, const char *src);
-
-/**
- * @brief Recursively copy files and directories.
- *
- * @param dest Destination path
- * @param src Source path
- * @return Status
- */
-Status fs_copy(const char *dest, const char *src);
-
-/**
- * @brief Open a directory
- *
- * @param path Path to directory
- * @param dir Output parameter directory handle
- * @return Status
- */
-Status fs_dopen(const char *path, Dir *dir);
-
-/**
- * @brief Read a directory entry
- *
- * @param dir Directory handle
- * @param index File index
- * @param entry Output parameter directory entry
- * @return Status
- */
-Status fs_dread(Dir *dir, u32 index, DirEntry *entry);
-
-#endif
-
-
+/* --- Directories --- */
+ATFS_Status atfs_dopen(BlockDevice *dev, const char *path, ATFS_Dir *dir);
+ATFS_Status fs_dread(ATFS_Dir *dir, ATFS_DirEntry *entry);
 
 #endif /* __ATFS_H__ */

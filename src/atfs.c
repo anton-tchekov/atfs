@@ -12,33 +12,7 @@
 
 const u8 ATFS_SIGNATURE[4] = { 'A', 'T', 'F', 'S' };
 
-const char *atfs_status_string(ATFS_Status status)
-{
-	static const char *status_str[] =
-	{
-		"No such file or directory",
-		"No space left on device",
-	};
-
-	if(status < DEVICE_STATUS_COUNT)
-	{
-		return dev_status_string(status);
-	}
-
-	status -= DEVICE_STATUS_COUNT;
-	assert(status >= 0 && status < (int)ARRLEN(status_str));
-	return status_str[status];
-}
-
-/**
- * @brief Find a directory entry in a directory
- *
- * @param name
- * @param name_len
- * @param block
- * @param entry
- * @return Status code
- */
+/* --- PRIVATE --- */
 static ATFS_Status _dir_entry_find(
 	const char *name, size_t name_len, u32 block, ATFS_DirEntry *entry)
 {
@@ -72,57 +46,72 @@ static ATFS_Status _dir_entry_find(
 
 	return STATUS_NO_SUCH_FILE_OR_DIR;
 #endif
+
+	return ATFS_STATUS_OK;
 }
 
-
-#if 0
-/**
- * @brief Read directory entry in a endianness-independant way
- *
- * @param buf Data buffer
- * @param entry Directory entry output
- */
 static void _dir_entry_get(u8 *buf, ATFS_DirEntry *entry)
 {
+#if 0
 	entry->StartBlock = load_le_32(buf + ATFS_DIR_ENTRY_OFFSET_START);
 	entry->SizeBlocks = load_le_32(buf + ATFS_DIR_ENTRY_OFFSET_SIZE);
 	memcpy(entry->Name, buf + ATFS_DIR_ENTRY_OFFSET_NAME,
 		ATFS_MAX_FILE_NAME_LENGTH + 1);
 	entry->Type = buf[ATFS_DIR_ENTRY_OFFSET_TYPE];
+#endif
 }
 
-ATFS_Status atfs_fread(ATFS_File *file, u32 block, void *buf)
+/* --- PUBLIC --- */
+const char *atfs_status_string(ATFS_Status status)
 {
+	static const char *status_str[] =
+	{
+		"No such file or directory",
+		"No space left on device",
+	};
+
+	if(status < DEVICE_STATUS_COUNT)
+	{
+		return dev_status_string(status);
+	}
+
+	status -= DEVICE_STATUS_COUNT;
+	assert(status >= 0 && status < (int)ARRLEN(status_str));
+	return status_str[status];
+}
+
+ATFS_Status atfs_fread(ATFS_File *file, void *buf, size_t bytes)
+{
+#if 0
 	if(block >= file->SizeBlocks)
 	{
 		return STATUS_OUT_OF_BOUNDS;
 	}
 
 	return disk_read(file->StartBlock + block, buf);
+#endif
+
+	return ATFS_STATUS_OK;
 }
 
-ATFS_Status atfs_fwrite(ATFS_File *file, u32 block, const void *buf)
+ATFS_Status atfs_fwrite(ATFS_File *file, const void *buf, size_t bytes)
 {
+#if 0
 	if(block >= file->SizeBlocks)
 	{
 		return STATUS_OUT_OF_BOUNDS;
 	}
 
 	return disk_write(file->StartBlock + block, buf);
-}
-
 #endif
 
+	return ATFS_STATUS_OK;
+}
 
-
-#if 0
-
-
-
-/* --- PUBLIC --- */
-
-Status fs_fcreate(const char *path, u32 size)
+ATFS_Status atfs_fcreate(BlockDevice *dev, const char *path,
+	u64 capacity_bytes)
 {
+#if 0
 	Dir dir;
 	DirEntry entry;
 	u32 start;
@@ -132,18 +121,15 @@ Status fs_fcreate(const char *path, u32 size)
 		return;
 	}
 
-	RETURN_IF(fs_alloc(size, &start));
-	return STATUS_OK;
+	RETURN_IF(fs_alloc(capacity, &start));
+#endif
+
+	return ATFS_STATUS_OK;
 }
 
-bool fs_exists(const char *path)
+ATFS_Status atfs_fopen(BlockDevice *dev, const char *path, ATFS_File *file)
 {
-	File f;
-	return fs_fopen(path, &f);
-}
-
-Status fs_fopen(const char *path, File *file)
-{
+#if 0
 	u8 buf[ATFS_BLOCK_SIZE];
 	DirEntry entry;
 	const char *s, *name;
@@ -188,21 +174,19 @@ Status fs_fopen(const char *path, File *file)
 	/* Entry was found */
 	file->StartBlock = entry.StartBlock;
 	file->SizeBlocks = entry.SizeBlocks;
-	return STATUS_OK;
+#endif
+
+	return ATFS_STATUS_OK;
 }
 
-Status fs_dopen(const char *path, Dir *dir)
+ATFS_Status atfs_dopen(BlockDevice *dev, const char *path, ATFS_Dir *dir)
 {
-	u8 buf[ATFS_BLOCK_SIZE];
-
-	RETURN_IF(fs_fopen(path, &dir->InternalFile));
-	RETURN_IF(fs_fread(&dir->InternalFile, 0, buf));
-	dir->NumEntries = load_le_32(buf);
-	return STATUS_OK;
+	return atfs_fopen(dev, path, &dir->InternalFile);
 }
 
-Status fs_dread(Dir *dir, u32 index, DirEntry *entry)
+ATFS_Status fs_dread(ATFS_Dir *dir, ATFS_DirEntry *entry)
 {
+#if 0
 	u8 buf[ATFS_BLOCK_SIZE];
 	u32 offset, block;
 
@@ -217,7 +201,7 @@ Status fs_dread(Dir *dir, u32 index, DirEntry *entry)
 	offset -= block * ATFS_BLOCK_SIZE;
 	RETURN_IF(fs_fread(&dir->InternalFile, block, buf));
 	dir_entry_get(buf + offset, entry);
-	return STATUS_OK;
-}
 #endif
 
+	return ATFS_STATUS_OK;
+}
