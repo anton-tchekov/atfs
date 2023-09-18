@@ -1,20 +1,5 @@
 #include "atfs_dir.h"
 
-
-void read_chunk(BlockDevice *dev)
-{
-	#if 0
-	u8 buffer[dev->BlockSize * NumChunks];
-
-	dev->Read(ChunkAddr, NumChunks, buffer);
-
-	/* Buffer enthält die gelesenen chunks */
-
-	// dev->Write(ChunkAddr, NumChunks, buffer);
-
-	#endif
-}
-
 void create_directory_entry(BlockDevice *dev, u32 chunkAddr, u32 sizeInChunks, DirEntry entry) {
     u8 buff[dev->BlockSize*sizeInChunks];
     dev->Read(chunkAddr, sizeInChunks, buff);
