@@ -1,5 +1,13 @@
-#ifndef __PATH_H__
-#define __PATH_H__
+/**
+ * @file    atfs_path.h
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    18.09.2023
+ * @brief   ATFS Path Utility Functions
+ */
+
+#ifndef __ATFS_PATH_H__
+#define __ATFS_PATH_H__
 
 /**
  * @brief Join two paths by copying the second path to the end of the first
@@ -11,7 +19,7 @@
  * @param append Path that should be added to the end of the first path
  * @return Joined path
  */
-char *path_join(char *path, const char *append);
+char *atfs_path_join(char *path, const char *append);
 
 /**
  * @brief Remove the last component of the path in place.
@@ -20,7 +28,7 @@ char *path_join(char *path, const char *append);
  * @param path The path to remove the last part of
  * @return Parent path
  */
-char *path_parent(char *path);
+char *atfs_path_parent(char *path);
 
 /**
  * @brief Get a pointer to the path excluding the first component
@@ -28,22 +36,14 @@ char *path_parent(char *path);
  * @param path The path to remove the first part of
  * @return Rest of the path
  */
-const char *path_rest(const char *path);
+const char *atfs_path_rest(const char *path);
 
 /**
  * @brief Check if a path is valid.
  *
  * @param path The path to check
- * @return true if valid, else false
+ * @return 1 if valid, else 0
  */
-bool path_valid(const char *path);
+int atfs_path_valid(const char *path);
 
-/**
- * @brief Check if a identifier is valid.
- *
- * @param ident The identifier to check
- * @return true if valid, else false
- */
-bool identifier_valid(const char *path);
-
-#endif /* __PATH_H__ */
+#endif /* __ATFS_PATH_H__ */

@@ -1,3 +1,10 @@
+/**
+ * @file    atfs_util.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    18.09.2023
+ */
+
 #include "atfs_util.h"
 
 void atfs_write32(u8 *p, u32 v)

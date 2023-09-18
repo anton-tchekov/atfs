@@ -1,3 +1,11 @@
+/**
+ * @file    atfs_util.h
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    18.09.2023
+ * @brief   ATFS Utility Function
+ */
+
 #ifndef __ATFS_UTIL_H__
 #define __ATFS_UTIL_H__
 

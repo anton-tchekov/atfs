@@ -2,7 +2,7 @@
  * @file    atfs.h
  * @author  Tim Gabrikowski, Anton Tchekov
  * @version 0.1
- * @date    29.05.2023
+ * @date    18.09.2023
  * @brief   ATFS File System
  *
  * File System Properties:
@@ -20,6 +20,8 @@
 
 #include "types.h"
 #include "dev.h"
+
+#define ATFS_DIR_SEPARATOR           '.'
 
 /** Size of the root directory in blocks */
 #define ATFS_INITIAL_ROOT_SIZE      4
@@ -95,10 +97,13 @@ typedef enum
 typedef struct
 {
 	/** Size of the file in bytes */
-	u64 Size;
+	u64 SizeBytes;
+
+	/** Capacity of the file in blocks */
+	u32 CapacityBlocks;
 
 	/** Starting address of the file in blocks */
-	u32 Start;
+	u32 StartBlock;
 
 	/** File type */
 	u8 Type;
@@ -140,14 +145,6 @@ typedef struct
 	/** Every directory is a file */
 	File InternalFile;
 } Dir;
-
-/**
- * @brief Mount disk with ATFS
- *
- * @param disk Drive number
- * @param ident Identifier
- */
-Status fs_mount(u32 disk, const char *ident);
 
 /**
  * @brief Create a file. If the file already exists, it is resized to
