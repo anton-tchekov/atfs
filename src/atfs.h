@@ -47,6 +47,8 @@ extern const u8 ATFS_SIGNATURE[4];
 /** Offset of root block size in ATFS bootsector */
 #define ATFS_OFFSET_ROOT_SIZE      20
 
+#define PROPAGATE(X) do { int a = X; if(a) { return a; } } while(0)
+
 enum
 {
 	ATFS_STATUS_OK,

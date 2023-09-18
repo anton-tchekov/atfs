@@ -34,7 +34,7 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 	u32 cur_size;
 	do
 	{
-		if((status = dev->Read(cur, 1, buf))) { return status; }
+		PROPAGATE(dev->Read(cur, 1, buf));
 		next = atfs_read32(buf + ATFS_OFFSET_FREE_NEXT);
 		cur_size = atfs_read32(buf + ATFS_OFFSET_FREE_SIZE);
 		if(cur_size >= req_size)
@@ -55,9 +55,9 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 	else if(cur_size == req_size)
 	{
 		/* Make previous area point to next area */
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(prev, 1, buf));
 	}
 	else /* cur_size > req_size */
 	{
@@ -66,15 +66,15 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 		u32 new_size = cur_size - req_size;
 
 		/* Make previous area point to second part */
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, new_start);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(prev, 1, buf));
 
 		/* Make second part point to next area */
 		memset(buf, 0, dev->BlockSize);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, new_size);
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next);
-		if((status = dev->Write(new_start, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(new_start, 1, buf));
 	}
 
 	*start = cur;
@@ -93,7 +93,7 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 
 	do
 	{
-		if((status = dev->Read(prev, 1, buf))) { return status; }
+		PROPAGATE(dev->Read(prev, 1, buf));
 		next = atfs_read32(buf + ATFS_OFFSET_FREE_NEXT);
 		prev_size = atfs_read32(buf + ATFS_OFFSET_FREE_SIZE);
 		if(next > block)
@@ -110,45 +110,45 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 
 	if(merge_with_next)
 	{
-		if((status = dev->Read(next, 1, buf))) { return status; }
+		PROPAGATE(dev->Read(next, 1, buf));
 		next_size = atfs_read32(buf + ATFS_OFFSET_FREE_SIZE);
 		next_next = atfs_read32(buf + ATFS_OFFSET_FREE_NEXT);
 	}
 
 	if(merge_with_prev && merge_with_next)
 	{
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next_next);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, prev_size + count + next_size);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(prev, 1, buf));
 	}
 	else if(merge_with_prev)
 	{
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, prev_size + count);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(status = dev->Write(prev, 1, buf));
 	}
 	else if(merge_with_next)
 	{
 		memset(buf, 0, dev->BlockSize);
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next_next);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, count + next_size);
-		if((status = dev->Write(block, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(block, 1, buf));
 
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, block);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(status = dev->Write(prev, 1, buf));
 	}
 	else
 	{
 		memset(buf, 0, dev->BlockSize);
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next);
 		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, count);
-		if((status = dev->Write(block, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(block, 1, buf));
 
-		if((status = read_for_modify(dev, prev, buf))) { return status; }
+		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, block);
-		if((status = dev->Write(prev, 1, buf))) { return status; }
+		PROPAGATE(dev->Write(prev, 1, buf));
 	}
 
 	return ATFS_STATUS_OK;
