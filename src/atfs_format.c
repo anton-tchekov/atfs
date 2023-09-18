@@ -20,14 +20,14 @@ static ATFS_Status _setup_boot_block(BlockDevice *dev)
 	atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, 0);
 	atfs_write32(buf + ATFS_OFFSET_ROOT_BLOCK, 1);
 	atfs_write32(buf + ATFS_OFFSET_ROOT_SIZE, ATFS_INITIAL_ROOT_SIZE);
-	return (ATFS_Status)dev->Write(0, 1, buf);
+	return dev->Write(0, 1, buf);
 }
 
 static ATFS_Status _setup_root_block(BlockDevice *dev)
 {
 	u8 buf[dev->BlockSize];
 	memset(buf, 0, dev->BlockSize);
-	return (ATFS_Status)dev->Write(1, 1, buf);
+	return dev->Write(1, 1, buf);
 }
 
 static ATFS_Status _setup_free_list(BlockDevice *dev)
@@ -46,7 +46,7 @@ static ATFS_Status _setup_free_list(BlockDevice *dev)
 	atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, free_size);
 
 	/* Free space starts after the root directory */
-	return (ATFS_Status)dev->Write(ATFS_INITIAL_ROOT_SIZE + 1, 1, buf);
+	return dev->Write(ATFS_INITIAL_ROOT_SIZE + 1, 1, buf);
 }
 
 ATFS_Status atfs_format(BlockDevice *dev)
