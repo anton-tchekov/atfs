@@ -37,20 +37,23 @@
 
 /* --- Directory entries --- */
 
+#define ATFS_DIR_ENTRY_SIZE        64
+
+#define ATFS_DIR_ENTRY_SIZE_POT     6
+
+/** Maximum number of entries in a directory */
+#define ATFS_DIR_MAX_ENTRIES       32
+
+#define ATFS_DIR_ENTRY_OFFSET_START 0
+
+#define ATFS_DIR_ENTRY_OFFSET_SIZE  4
+
+#define ATFS_DIR_ENTRY_OFFSET_TYPE  8
+
+#define ATFS_DIR_ENTRY_OFFSET_NAME  9
+
 /** Maximum length of a file name */
-#define ATFS_MAX_FILE_NAME_LENGTH 255
-
-/** Byte offset of the entry type */
-#define ATFS_DIR_ENTRY_OFFSET_TYPE  0
-
-/** Byte offset of the starting block */
-#define ATFS_DIR_ENTRY_OFFSET_START 1
-
-/** Byte offset of the size in bytes */
-#define ATFS_DIR_ENTRY_OFFSET_SIZE  5
-
-/** Byte offset of the entry name */
-#define ATFS_DIR_ENTRY_OFFSET_NAME 13
+#define ATFS_MAX_FILE_NAME_LENGTH  54
 
 /* --- Boot sector --- */
 
@@ -82,23 +85,22 @@ enum
 	ATFS_STATUS_OK,
 	ATFS_STATUS_NO_SUCH_FILE_OR_DIRECTORY = DEVICE_STATUS_COUNT,
 	ATFS_STATUS_NO_SPACE_LEFT_ON_DEVICE,
+	ATFS_STATUS_PATH_FORMAT_INVALID,
+	ATFS_STATUS_DIRECTORY_FULL,
 };
 
 typedef int ATFS_Status;
 
 typedef enum
 {
-	ATFS_TYPE_TERMINATOR,
+	ATFS_TYPE_FREE,
 	ATFS_TYPE_DIR,
 	ATFS_TYPE_FILE,
 } ATFS_FileType;
 
-/** Directory Entry structure, this is NOT the on-disk representation */
+/** Directory Entry structure */
 typedef struct
 {
-	/** Size of the file in bytes */
-	u64 SizeBytes;
-
 	/** Capacity of the file in blocks */
 	u32 CapacityBlocks;
 

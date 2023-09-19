@@ -38,6 +38,22 @@ char *atfs_path_parent(char *path)
 	return path;
 }
 
+size_t atfs_path_first_len(const char *path)
+{
+	int c;
+	const char *p;
+
+	for(p = path; (c = *p); ++p)
+	{
+		if(c == ATFS_DIR_SEPARATOR)
+		{
+			break;
+		}
+	}
+
+	return p - path;
+}
+
 const char *atfs_path_rest(const char *path)
 {
 	int c;

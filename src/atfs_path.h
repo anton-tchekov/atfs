@@ -9,6 +9,8 @@
 #ifndef __ATFS_PATH_H__
 #define __ATFS_PATH_H__
 
+#include "types.h"
+
 /**
  * @brief Join two paths by copying the second path to the end of the first
  *        path and adding a dot in between. The first string must have enough
@@ -29,6 +31,15 @@ char *atfs_path_join(char *path, const char *append);
  * @return Parent path
  */
 char *atfs_path_parent(char *path);
+
+/**
+ * @brief Return the length of the first path component.
+ *        The validity of the path is not checked.
+ *
+ * @param path The path
+ * @return First component length
+ */
+size_t atfs_path_first_len(const char *path);
 
 /**
  * @brief Get a pointer to the path excluding the first component

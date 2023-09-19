@@ -27,6 +27,9 @@ typedef struct
 	/** Size of each block in bytes */
 	u32 BlockSize;
 
+	/** Size of each block as a power of two */
+	u32 BlockSizePOT;
+
 	/** Number of blocks in device */
 	u32 BlockCount;
 

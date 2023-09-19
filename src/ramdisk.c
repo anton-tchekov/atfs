@@ -45,6 +45,7 @@ static DeviceStatus _ramdisk_write(u32 offset, u32 count, u8 *buffer)
 BlockDevice ramdisk =
 {
 	.BlockSize = RAMFS_BLOCK_SIZE,
+	.BlockSizePOT = 9,
 	.BlockCount = RAMFS_BLOCK_COUNT,
 	.Read = _ramdisk_read,
 	.Write = _ramdisk_write,

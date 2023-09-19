@@ -6,6 +6,9 @@
  */
 
 #include "atfs.h"
+#include "atfs_util.h"
+#include "atfs_path.h"
+#include "atfs_alloc.h"
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
@@ -13,52 +16,105 @@
 const u8 ATFS_SIGNATURE[4] = { 'A', 'T', 'F', 'S' };
 
 /* --- PRIVATE --- */
-static ATFS_Status _dir_entry_find(
-	const char *name, size_t name_len, u32 block, ATFS_DirEntry *entry)
+typedef struct
 {
-#if 0
-	u8 buf[ATFS_BLOCK_SIZE];
-	u32 i, num_entries, offset;
+	u32 Type;
+	u32 CapacityBlocks;
+	u32 StartBlock;
+} ATFS_NamelessDirEntry;
 
-	RETURN_IF(disk_read(block, buf));
-	num_entries = load_le_32(buf + ATFS_DIR_OFFSET_NUM_ENTRIES);
-	offset = ATFS_DIR_ENTRY_SIZE;
-	for(i = 0; i < num_entries; ++i)
+static ATFS_Status _dir_entry_find(BlockDevice *dev,
+	const char *name, size_t name_len, u32 block, ATFS_NamelessDirEntry *entry)
+{
+	u8 buf[dev->BlockSize];
+	u32 i, offset, entry_type;
+	const char *entry_name;
+
+	offset = dev->BlockSize;
+	for(i = 0; i < ATFS_DIR_MAX_ENTRIES; ++i)
 	{
-		if(offset == ATFS_BLOCK_SIZE)
+		if(offset == dev->BlockSize)
 		{
 			offset = 0;
+			PROPAGATE(dev->Read(block, 1, buf));
 			++block;
-			RETURN_IF(disk_read(block, buf));
 		}
 
-		dir_entry_get(buf + offset, entry);
-
-		/* Compare name with each directory entry */
-		if(strlen(entry->Name) == name_len &&
-			!strncmp(name, entry->Name, name_len))
+		entry_name = (const char *)(entry + ATFS_DIR_ENTRY_OFFSET_NAME);
+		entry_type = buf[offset + ATFS_DIR_ENTRY_OFFSET_TYPE];
+		if(entry_type != ATFS_TYPE_FREE &&
+			strlen(entry_name) == name_len &&
+			!strncmp(name, entry_name, name_len))
 		{
-			return STATUS_OK;
+			entry->Type = entry_type;
+			entry->StartBlock =
+				atfs_read32(buf + offset + ATFS_DIR_ENTRY_OFFSET_START);
+			entry->CapacityBlocks =
+				atfs_read32(buf + offset + ATFS_DIR_ENTRY_OFFSET_SIZE);
+			return ATFS_STATUS_OK;
 		}
 
 		offset += ATFS_DIR_ENTRY_SIZE;
 	}
 
-	return STATUS_NO_SUCH_FILE_OR_DIR;
-#endif
-
-	return ATFS_STATUS_OK;
+	return ATFS_STATUS_NO_SUCH_FILE_OR_DIRECTORY;
 }
 
-static void _dir_entry_get(u8 *buf, ATFS_DirEntry *entry)
+static void _dir_entry_write(u8 *buf, ATFS_DirEntry *entry)
 {
-#if 0
-	entry->StartBlock = load_le_32(buf + ATFS_DIR_ENTRY_OFFSET_START);
-	entry->SizeBlocks = load_le_32(buf + ATFS_DIR_ENTRY_OFFSET_SIZE);
-	memcpy(entry->Name, buf + ATFS_DIR_ENTRY_OFFSET_NAME,
-		ATFS_MAX_FILE_NAME_LENGTH + 1);
-	entry->Type = buf[ATFS_DIR_ENTRY_OFFSET_TYPE];
-#endif
+	buf[ATFS_DIR_ENTRY_OFFSET_TYPE] = entry->Type;
+	atfs_write32(buf + ATFS_DIR_ENTRY_OFFSET_START, entry->StartBlock);
+	atfs_write32(buf + ATFS_DIR_ENTRY_OFFSET_SIZE, entry->SizeBlocks);
+	strcpy(buf + ATFS_DIR_ENTRY_OFFSET_NAME, entry->Name);
+}
+
+static ATFS_Status _dir_entry_insert(BlockDevice *dev, u32 block,
+	ATFS_DirEntry *entry)
+{
+	u8 buf[dev->BlockSize];
+	u32 i, cur, offset, insert_index, entry_type;
+	const char *entry_name;
+
+	insert_index = ATFS_DIR_MAX_ENTRIES;
+	offset = dev->BlockSize;
+	cur = block;
+	for(i = 0; i < ATFS_DIR_MAX_ENTRIES; ++i)
+	{
+		if(offset == dev->BlockSize)
+		{
+			offset = 0;
+			PROPAGATE(dev->Read(cur, 1, buf));
+			++cur;
+		}
+
+		entry_type = buf[offset + ATFS_DIR_ENTRY_OFFSET_TYPE];
+		entry_name = (const char *)(entry + ATFS_DIR_ENTRY_OFFSET_NAME);
+		if(entry_type == ATFS_TYPE_FREE)
+		{
+			insert_index = offset;
+		}
+		else if(!strcmp(entry_name, entry->Name))
+		{
+			insert_index = offset;
+			break;
+		}
+
+		offset += ATFS_DIR_ENTRY_SIZE;
+	}
+
+	if(insert_index == ATFS_DIR_MAX_ENTRIES)
+	{
+		return ATFS_STATUS_DIRECTORY_FULL;
+	}
+
+	i = dev->BlockSizePOT - ATFS_DIR_ENTRY_SIZE_POT;
+	cur = block + (insert_index >> i);
+	offset = insert_index & ((1 << (i + 1)) - 1);
+
+	PROPAGATE(dev->Read(cur, 1, buf));
+	_dir_entry_write(buf + offset, entry);
+	PROPAGATE(dev->Write(cur, 1, buf));
+	return ATFS_STATUS_OK;
 }
 
 /* --- PUBLIC --- */
@@ -68,6 +124,8 @@ const char *atfs_status_string(ATFS_Status status)
 	{
 		"No such file or directory",
 		"No space left on device",
+		"Invalid path format",
+		"Directory full",
 	};
 
 	if(status < DEVICE_STATUS_COUNT)
@@ -111,18 +169,30 @@ ATFS_Status atfs_fwrite(ATFS_File *file, const void *buf, size_t bytes)
 ATFS_Status atfs_fcreate(BlockDevice *dev, const char *path,
 	u64 capacity_bytes)
 {
+	u32 capacity, start;
+
+	/* Check path format beforehand for simplicity */
+	if(!atfs_path_valid(path))
+	{
+		return ATFS_STATUS_PATH_FORMAT_INVALID;
+	}
+
+	capacity = capacity_bytes >> dev->BlockSizePOT;
+
 #if 0
 	Dir dir;
 	DirEntry entry;
-	u32 start;
 
 	if(!_traverse(path, &dir))
 	{
 		return;
 	}
 
-	RETURN_IF(fs_alloc(capacity, &start));
 #endif
+
+	PROPAGATE(atfs_alloc(dev, capacity, &start));
+
+
 
 	return ATFS_STATUS_OK;
 }
