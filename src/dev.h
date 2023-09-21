@@ -37,7 +37,7 @@ typedef struct
 	DeviceStatus (*Read)(u32 offset, u32 count, u8 *buffer);
 
 	/** Multi-block write operation */
-	DeviceStatus (*Write)(u32 offset, u32 count, u8 *buffer);
+	DeviceStatus (*Write)(u32 offset, u32 count, const u8 *buffer);
 } BlockDevice;
 
 /**

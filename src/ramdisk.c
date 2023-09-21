@@ -31,7 +31,7 @@ static DeviceStatus _ramdisk_read(u32 offset, u32 count, u8 *buffer)
 	return DEVICE_STATUS_OK;
 }
 
-static DeviceStatus _ramdisk_write(u32 offset, u32 count, u8 *buffer)
+static DeviceStatus _ramdisk_write(u32 offset, u32 count, const u8 *buffer)
 {
 	if(_check_range(offset, count))
 	{
