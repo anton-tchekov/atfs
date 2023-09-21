@@ -20,6 +20,23 @@ char *atfs_path_join(char *path, const char *append)
 	return path;
 }
 
+const char *atfs_path_last(const char *path)
+{
+	int c;
+	const char *s, *last_sep;
+
+	last_sep = path;
+	for(s = path; (c = *s); ++s)
+	{
+		if(c == ATFS_DIR_SEPARATOR)
+		{
+			last_sep = s + 1;
+		}
+	}
+
+	return last_sep;
+}
+
 char *atfs_path_parent(char *path)
 {
 	int c;

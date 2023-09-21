@@ -24,6 +24,14 @@
 char *atfs_path_join(char *path, const char *append);
 
 /**
+ * @brief Get the last component of a path
+ *
+ * @param path Path
+ * @return Pointer to last component of the path
+ */
+const char *atfs_path_last(const char *path);
+
+/**
  * @brief Remove the last component of the path in place.
  *        The validity of the path is not checked.
  *
