@@ -11,7 +11,7 @@ PROJECT := atfs-test
 CC := gcc
 
 # Compiler flags
-CFLAGS := -Wall -Wextra -DATFS_DEBUG
+CFLAGS := -Wall -Wextra -DATFS_DEBUG -g
 
 # Linker flags
 LDFLAGS :=
