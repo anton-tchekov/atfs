@@ -10,6 +10,27 @@
 #define ROOT_FILE_ADDR 0x00000001
 #define ROOT_FILE_CHUNK_SIZE 4
 
+ATFS_Status atfs_ls(BlockDevice *dev, const char *path)
+{
+	ATFS_Dir dir;
+	ATFS_DirEntry entry;
+	ATFS_Status status;
+
+	PROPAGATE(atfs_dopen(dev, path, &dir));
+	while((status = atfs_dread(&dir, &entry)) == ATFS_STATUS_OK)
+	{
+		printf("%8d  %s%s\n", entry.SizeBlocks,
+			entry.Name, entry.Type == ATFS_TYPE_DIR ? "/" : "");
+	}
+
+	if(status != ATFS_STATUS_DIR_END)
+	{
+		return status;
+	}
+
+	return ATFS_STATUS_OK;
+}
+
 int main(int argc, char **argv)
 {
 	BlockDevice *dev = &ramdisk;
@@ -51,9 +72,8 @@ int main(int argc, char **argv)
 
 	printf("%s\n", atfs_status_string(atfs_format(dev)));
 
-
-	//printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
-	//printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
+	printf("%s\n", atfs_status_string(DEVICE_STATUS_OUT_OF_BOUNDS));
+	printf("%s\n", atfs_status_string(ATFS_NO_SPACE_LEFT_ON_DEVICE));
 #endif
 
 	printf("%s\n", atfs_status_string(atfs_format(dev)));
@@ -64,8 +84,55 @@ int main(int argc, char **argv)
 	dev_print_block(dev, 4);
 	dev_print_block(dev, 5);
 
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "bin", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "boot", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "dev", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "etc", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "home", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "lib", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "media", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "mnt", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "opt", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "proc", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "run", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "bin", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "srv", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "sys", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "tmp", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "usr", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "var", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "aa", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "bb", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "cc", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "dd", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "ee", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "ff", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "gg", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "hh", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "ii", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "jj", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "kk", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "ll", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "mm", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "nn", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "oo", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "pp", ATFS_TYPE_DIR, 4)));
+
+	printf("create subdirs?\n");
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "usr.bin", ATFS_TYPE_DIR, 4)));
+	printf("%s\n", atfs_status_string(atfs_fcreate(dev, "home.anton", ATFS_TYPE_DIR, 4)));
+
+	dev_print_block(dev, 1);
+	dev_print_block(dev, 2);
+	dev_print_block(dev, 3);
+	dev_print_block(dev, 4);
+
 	atfs_print_free(dev);
 
+	printf("%s\n", atfs_status_string(atfs_ls(dev, "")));
+
+
+#if 0
 	u32 start;
 
 	u32 first = 0;
@@ -90,9 +157,12 @@ int main(int argc, char **argv)
 
 
 	atfs_print_free(dev);
+#endif
 
 	return 0;
 }
+
+
 #if 0
 
 #include "fs.h"
