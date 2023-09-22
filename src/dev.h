@@ -11,6 +11,7 @@
 
 #include "types.h"
 
+/** Device status code */
 enum
 {
 	DEVICE_STATUS_OK,
