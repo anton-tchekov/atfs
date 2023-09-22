@@ -10,7 +10,6 @@
 #define __ATFS_FORMAT_H__
 
 #include "atfs.h"
-#include "dev.h"
 
 /**
  * @brief Format a block device with the ATFS file system
