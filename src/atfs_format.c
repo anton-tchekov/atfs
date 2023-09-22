@@ -26,8 +26,17 @@ static ATFS_Status _setup_boot_block(BlockDevice *dev)
 static ATFS_Status _setup_root_block(BlockDevice *dev)
 {
 	u8 buf[dev->BlockSize];
+	u32 i;
+
+	/* TODO: Not really satisfied with having to use a buffer just to
+		zero blocks. Maybe add a dev->Zero() operation? */
 	memset(buf, 0, dev->BlockSize);
-	return dev->Write(1, 1, buf);
+	for(i = 1; i < 1 + ATFS_INITIAL_ROOT_SIZE; ++i)
+	{
+		PROPAGATE(dev->Write(i, 1, buf));
+	}
+
+	return ATFS_STATUS_OK;
 }
 
 static ATFS_Status _setup_free_list(BlockDevice *dev)
@@ -51,21 +60,8 @@ static ATFS_Status _setup_free_list(BlockDevice *dev)
 
 ATFS_Status atfs_format(BlockDevice *dev)
 {
-	ATFS_Status ret;
-	if((ret = _setup_boot_block(dev)))
-	{
-		return ret;
-	}
-
-	if((ret = _setup_root_block(dev)))
-	{
-		return ret;
-	}
-
-	if((ret = _setup_free_list(dev)))
-	{
-		return ret;
-	}
-
+	PROPAGATE(_setup_boot_block(dev));
+	PROPAGATE(_setup_root_block(dev));
+	PROPAGATE(_setup_free_list(dev));
 	return ATFS_STATUS_OK;
 }
