@@ -1,6 +1,12 @@
 #include "atfs_dir.h"
+#include <string.h>
+#include <stdio.h>
 
-void create_directory_entry(BlockDevice *dev, u32 chunkAddr, u32 sizeInChunks, DirEntry entry) {
+#if 0
+
+void create_directory_entry(BlockDevice *dev, u32 chunkAddr, u32 sizeInChunks,
+	DirEntry entry)
+{
     u8 buff[dev->BlockSize*sizeInChunks];
     dev->Read(chunkAddr, sizeInChunks, buff);
 
@@ -18,7 +24,8 @@ void create_directory_entry(BlockDevice *dev, u32 chunkAddr, u32 sizeInChunks, D
     dev->Write(chunkAddr, sizeInChunks, buff);
 }
 
-DirEntry get_adress_by_path(BlockDevice *dev, char* path, DirEntry currDir) {
+DirEntry get_adress_by_path(BlockDevice *dev, char* path, DirEntry currDir)
+{
     printf("CHECK: \n");
 
     if(path[0] == '/'){
@@ -54,5 +61,6 @@ DirEntry get_adress_by_path(BlockDevice *dev, char* path, DirEntry currDir) {
             }
         }
     }
-
 }
+
+#endif
