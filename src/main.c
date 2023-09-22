@@ -1,3 +1,11 @@
+/**
+ * @file    main.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    22.09.2023
+ * @brief   ATFS Test functions
+ */
+
 #include <stdio.h>
 #include "ramdisk.h"
 #include "atfs_dir.h"

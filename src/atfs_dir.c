@@ -1,3 +1,10 @@
+/**
+ * @file    atfs_dir.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    21.09.2023
+ */
+
 #include "atfs_dir.h"
 #include <string.h>
 #include <stdio.h>

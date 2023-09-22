@@ -1,8 +1,8 @@
 /**
  * @file    ramdisk.h
- * @author  Anton Tchekov
+ * @author  Tim Gabrikowski, Anton Tchekov
  * @version 0.1
- * @date    28.06.2023
+ * @date    22.09.2023
  * @brief   RAM Disk for testing the file system
  */
 

@@ -1,3 +1,10 @@
+/**
+ * @file    dev.c
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    22.09.2023
+ */
+
 #include "dev.h"
 #include <inttypes.h>
 #include <stdio.h>

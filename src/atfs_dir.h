@@ -1,3 +1,11 @@
+/**
+ * @file    atfs_dir.h
+ * @author  Tim Gabrikowski, Anton Tchekov
+ * @version 0.1
+ * @date    21.09.2023
+ * @brief   ATFS Directory functions
+ */
+
 #ifndef __ATFS_DIR_H__
 #define __ATFS_DIR_H__
 
