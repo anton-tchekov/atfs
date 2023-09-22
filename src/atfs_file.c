@@ -131,14 +131,18 @@ ATFS_Status atfs_fcreate(BlockDevice *dev, const char *path,
 
 ATFS_Status atfs_fopen(BlockDevice *dev, const char *path, ATFS_File *file)
 {
-	u32 parent, parent_size;
 	ATFS_NamelessDirEntry entry;
 	const char *name, *end;
 
 	PROPAGATE(check_path(path));
-	PROPAGATE(atfs_traverse(dev, path, &parent, &parent_size, &name, &end));
-	PROPAGATE(_dir_entry_find(
-		dev, name, end - name, parent, parent_size, &entry));
+	PROPAGATE(atfs_traverse(dev, path, &entry.StartBlock, &entry.SizeBlocks,
+		&name, &end));
+
+	if(*name != '\0')
+	{
+		PROPAGATE(_dir_entry_find(dev, name, end - name,
+			entry.StartBlock, entry.SizeBlocks, &entry));
+	}
 
 	file->Device = dev;
 	file->StartBlock = entry.StartBlock;

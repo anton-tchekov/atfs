@@ -6,6 +6,7 @@
  */
 
 #include "atfs_delete.h"
+#include <string.h>
 
 ATFS_Status _dir_entry_delete(BlockDevice *dev,
 	const char *name, u32 block, u32 size)

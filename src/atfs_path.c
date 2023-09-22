@@ -14,9 +14,17 @@ char *atfs_path_join(char *path, const char *append)
 {
 	char *start;
 
-	start = path + strlen(path);
-	*start = ATFS_DIR_SEPARATOR;
-	strcpy(start + 1, append);
+	if(*path)
+	{
+		start = path + strlen(path);
+		*start = ATFS_DIR_SEPARATOR;
+		strcpy(start + 1, append);
+	}
+	else
+	{
+		strcpy(path, append);
+	}
+
 	return path;
 }
 
