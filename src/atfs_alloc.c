@@ -34,10 +34,10 @@ static DeviceStatus read_for_modify(BlockDevice *dev, u32 block, u8 *buf)
 ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 {
 	u8 buf[dev->BlockSize];
-	u32 cur = ATFS_SECTOR_BOOT;
-	u32 prev = 0;
-	u32 next;
-	u32 cur_size;
+	u32 cur, prev, next, cur_size;
+
+	cur = ATFS_SECTOR_BOOT;
+	prev = 0;
 	do
 	{
 		PROPAGATE(dev->Read(cur, 1, buf));
@@ -90,12 +90,10 @@ ATFS_Status atfs_alloc(BlockDevice *dev, u32 req_size, u32 *start)
 ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 {
 	u8 buf[dev->BlockSize];
-	u32 prev = ATFS_SECTOR_BOOT;
-	u32 next;
-	u32 prev_size;
-	u32 next_size;
-	u32 next_next;
+	u32 prev, prev_size, next, next_size, next_next;
+	int merge_with_prev, merge_with_next;
 
+	prev = ATFS_SECTOR_BOOT;
 	do
 	{
 		PROPAGATE(dev->Read(prev, 1, buf));
@@ -110,9 +108,8 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 	}
 	while(prev);
 
-	int merge_with_prev = prev + prev_size == block;
-	int merge_with_next = block + count == next;
-
+	merge_with_prev = prev + prev_size == block;
+	merge_with_next = block + count == next;
 	if(merge_with_next)
 	{
 		PROPAGATE(dev->Read(next, 1, buf));
@@ -124,7 +121,8 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 	{
 		PROPAGATE(read_for_modify(dev, prev, buf));
 		atfs_write32(buf + ATFS_OFFSET_FREE_NEXT, next_next);
-		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE, prev_size + count + next_size);
+		atfs_write32(buf + ATFS_OFFSET_FREE_SIZE,
+			prev_size + count + next_size);
 		PROPAGATE(dev->Write(prev, 1, buf));
 	}
 	else if(merge_with_prev)
@@ -164,11 +162,11 @@ ATFS_Status atfs_free(BlockDevice *dev, u32 block, u32 count)
 void atfs_print_free(BlockDevice *dev)
 {
 	u8 buf[dev->BlockSize];
-	u32 cur = ATFS_SECTOR_BOOT;
-	u32 i = 0;
-	u32 prev = 0;
-	u32 next = 1;
-	u32 cur_size = 0;
+	u32 i, prev, cur, next, cur_size;
+
+	i = 0;
+	prev = 0;
+	cur = ATFS_SECTOR_BOOT;
 	do
 	{
 		DeviceStatus status = dev->Read(cur, 1, buf);
