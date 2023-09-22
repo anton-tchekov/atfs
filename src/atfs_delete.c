@@ -12,5 +12,6 @@ ATFS_Status atfs_delete(BlockDevice *dev, const char *path)
 	/* TODO: This is work in progress */
 
 	return ATFS_STATUS_NOT_IMPLEMENTED;
+	(void)dev;
 	(void)path;
 }

@@ -31,7 +31,7 @@ ATFS_Status atfs_ls(BlockDevice *dev, const char *path)
 	return ATFS_STATUS_OK;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
 	BlockDevice *dev = &ramdisk;
 
