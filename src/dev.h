@@ -1,6 +1,6 @@
 /**
  * @file    dev.h
- * @author  Anton Tchekov
+ * @author  Tim Gabrikowski, Anton Tchekov
  * @version 0.1
  * @date    28.06.2023
  * @brief   Block device interface

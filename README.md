@@ -179,7 +179,7 @@ Then forward call to block device interface.
 
 ## More complex operations
 
-### Move / Rename
+### Move / Rename (work in progress)
 
 `` move `destination-path` `source-path` ``
 

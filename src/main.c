@@ -188,6 +188,7 @@ ATFS_Status atfs_ls(BlockDevice *dev, const char *path, int detailed)
 
 ATFS_Status atfs_tree(BlockDevice *dev, const char *path)
 {
+	/* Tree function without recursion, nice! */
 	char buf[256];
 	ATFS_Dir dir[16];
 	ATFS_DirEntry entry;
